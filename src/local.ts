@@ -1,11 +1,14 @@
 import {
    generator,
-   StoreModule }  from './generator.js';
+   GeneratorStores,
+   StorageDerived,
+   StorageReadable,
+   StorageWritable } from './generator.js';
 
 const storage: Storage = typeof globalThis?.localStorage !== 'undefined' ? globalThis.localStorage : undefined;
 
-const g: StoreModule = generator(storage);
+const g: GeneratorStores = generator({ storage });
 
-export const readable = g.readable;
-export const writable = g.writable;
-export const derived = g.derived;
+export const readable: StorageReadable = g.readable;
+export const writable: StorageWritable = g.writable;
+export const derived: StorageDerived = g.derived;

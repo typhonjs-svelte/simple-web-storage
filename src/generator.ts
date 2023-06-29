@@ -1,85 +1,39 @@
 import {
    writable as ogWritable,
-   get } from 'svelte/store';
-
-import {
-   is_function,
-   noop,
-   run_all }      from 'svelte/internal';
+   get }             from 'svelte/store';
 
 import type {
    Invalidator,
    Readable,
    StartStopNotifier,
+   Stores,
+   StoresValues,
    Subscriber,
    Unsubscriber,
    Updater,
-   Writable }     from 'svelte/store';
+   Writable }        from 'svelte/store';
 
-/** One or more `Readable`s. */
-type Stores = Readable<any> | [Readable<any>, ...Array<Readable<any>>];
-
-/** One or more values from `Readable` stores. */
-type StoresValues<T> = T extends Readable<infer U> ? U : { [K in keyof T]: T[K] extends Readable<infer U> ? U : never };
-
-type SimpleDeriver<T, U> = (values: StoresValues<T>) => U
-type AdvancedDeriver<T, U> = (values: StoresValues<T>, set: Subscriber<U>) => Unsubscriber | void
-type Deriver<T, U> = SimpleDeriver<T, U> | AdvancedDeriver<T, U>
-
-function isSimpleDeriver<T, U>(deriver: Deriver<T, U>): deriver is SimpleDeriver<T, U>
+function isSimpleDeriver<S extends Stores, T>(deriver: Deriver<S, T>): deriver is SimpleDeriver<S, T>
 {
    return deriver.length < 2;
 }
 
-export type StoreModule = {
-   /**
-    * @template T
-    * Creates a `Readable` store that allows reading by subscription.
-    *
-    * @param {string}   key - storage key
-    *
-    * @param {T}        value -  initial value
-    *
-    * @param {StartStopNotifier<T>} start - Start and stop notifications for subscriptions.
-    *
-    * @returns {Readable<T>} A readable storage store.
-    */
-   readable: <T>(key: string, value: T, start: StartStopNotifier<T>) => Readable<T>;
+const noop = () => void 0;
 
-   /**
-    * @template T
-    * Create a `Writable` store that allows both updating and reading by subscription.
-    *
-    * @param {string}   key - Storage key.
-    *
-    * @param {T}        value - Default value.
-    *
-    * @param {StartStopNotifier<T>} [start] - Start and stop notifications for subscriptions.
-    *
-    * @returns {Writable<T>} A writable storage store.
-    */
-   writable: <T>(key: string, value: T, start?: StartStopNotifier<T>) => Writable<T>;
-
-   /**
-    * @template S, U
-    *
-    * Derived value store by synchronizing one or more readable stores and applying an aggregation function over its
-    * input values.
-    *
-    * @param {string}   key - Storage key.
-    *
-    * @param {S}        stores - Input stores.
-    *
-    * @param {Deriver<S, U>}  fn - Function callback that aggregates the values.
-    *
-    * @param {U}        [initial_value] When used asynchronously.
-    *
-    * @returns {Readable<U>} A derived storage store.
-    */
-   derived: <S extends Stores, U>(key: string, stores: S, fn: Deriver<S, U>, initial_value?: U) => Readable<U>;
-}
-
-export function generator(storage: Storage): StoreModule
+/**
+ * Generates derived, readable, writable helper functions wrapping the Storage method with any additional customization
+ * of serialization.
+ *
+ * @param {object}   opts - Generator options.
+ *
+ * @param {Storage}  storage - The web storage source.
+ *
+ * @param {(value: any) => string}  [opts.serialize] - Replace with custom serialization; default: `JSON.stringify`.
+ *
+ * @param {(value: string) => any}  [opts.deserialize] - Replace with custom deserialization; default: `JSON.parse`.
+ */
+export function generator({ storage, serialize = JSON.stringify, deserialize = JSON.parse }:
+ { storage: Storage, serialize?: (value: any) => string, deserialize?: (value: string) => any }): GeneratorStores
 {
    function readable<T>(key: string, value: T, start: StartStopNotifier<T>): Readable<T>
    {
@@ -88,13 +42,13 @@ export function generator(storage: Storage): StoreModule
       }
    }
 
-   function writable<T>(key: string, value: T, start: StartStopNotifier<T> = noop): Writable<T>
+   function writable<T>(key: string, value: T, start?: StartStopNotifier<T>): Writable<T>
    {
       function wrap_start(ogSet: Subscriber<T>)
       {
          return start(function wrap_set(new_value: T)
             {
-               if (storage) { storage.setItem(key, JSON.stringify(new_value)); }
+               if (storage) { storage.setItem(key, serialize(new_value)); }
                return ogSet(new_value)
             },
             function wrap_update(fn: Updater<T>)
@@ -110,18 +64,18 @@ export function generator(storage: Storage): StoreModule
 
          try
          {
-            if (storageValue) { value = JSON.parse(storageValue); }
+            if (storageValue) { value = deserialize(storageValue); }
          }
          catch (err) { /**/ }
 
-         storage.setItem(key, JSON.stringify(value));
+         storage.setItem(key, serialize(value));
       }
 
-      const ogStore = ogWritable(value, start ? wrap_start : undefined);
+      const ogStore = ogWritable(value, start ? wrap_start : void 0);
 
       function set(new_value: T): void
       {
-         if (storage) { storage.setItem(key, JSON.stringify(new_value)); }
+         if (storage) { storage.setItem(key, serialize(new_value)); }
          ogStore.set(new_value);
       }
 
@@ -138,7 +92,7 @@ export function generator(storage: Storage): StoreModule
       return { set, update, subscribe };
    }
 
-   function derived<S extends Stores, U>(key: string, stores: S, fn: Deriver<S, U>, initial_value?: U): Readable<U>
+   function derived<S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T): Readable<T>
    {
       const single = !Array.isArray(stores);
       const stores_array: Array<Readable<any>> = single ? [stores as Readable<any>] : stores as Array<Readable<any>>;
@@ -147,12 +101,12 @@ export function generator(storage: Storage): StoreModule
       {
          try
          {
-            initial_value = JSON.parse(storage.getItem(key));
+            initial_value = deserialize(storage.getItem(key));
          }
          catch (err) { /**/ }
       }
 
-      return readable(key, initial_value, (set) =>
+      return readable(key, initial_value, (set, update) =>
       {
          let inited = false;
          const values: StoresValues<S> = [] as StoresValues<S>;
@@ -173,8 +127,8 @@ export function generator(storage: Storage): StoreModule
             }
             else
             {
-               const result = fn(input, set);
-               cleanup = is_function(result) ? result as Unsubscriber : noop;
+               const result = fn(input, set, update);
+               cleanup = typeof result === 'function' ? result as Unsubscriber : noop;
             }
          };
 
@@ -192,7 +146,8 @@ export function generator(storage: Storage): StoreModule
 
          return function stop()
          {
-            run_all(unsubscribers);
+            // Equivalent to run_all from Svelte internals.
+            unsubscribers.forEach((unsubscriber) => unsubscriber());
             cleanup();
          }
       });
@@ -203,4 +158,65 @@ export function generator(storage: Storage): StoreModule
       writable,
       derived
    }
+}
+
+// Types -------------------------------------------------------------------------------------------------------------
+
+type AdvancedDeriver<S extends Stores, T> = (values: StoresValues<S>, set: Subscriber<T>,
+ update: (fn: Updater<T>) => void) => Unsubscriber | void;
+
+type Deriver<S extends Stores, T> = SimpleDeriver<S, T> | AdvancedDeriver<S, T>;
+
+type SimpleDeriver<S extends Stores, T> = (values: StoresValues<S>) => T;
+
+/**
+ * @template T
+ * Creates a `Readable` store that allows reading by subscription.
+ *
+ * @param {string}   key - storage key
+ *
+ * @param {T}        value -  initial value
+ *
+ * @param {StartStopNotifier<T>} start - Start and stop notifications for subscriptions.
+ *
+ * @returns {Readable<T>} A readable storage store.
+ */
+export type StorageReadable = <T>(key: string, value: T, start: StartStopNotifier<T>) => Readable<T>;
+
+/**
+ * @template T
+ * Create a `Writable` store that allows both updating and reading by subscription.
+ *
+ * @param {string}   key - Storage key.
+ *
+ * @param {T}        value - Default value.
+ *
+ * @param {StartStopNotifier<T>} [start] - Start and stop notifications for subscriptions.
+ *
+ * @returns {Writable<T>} A writable storage store.
+ */
+export type StorageWritable = <T>(key: string, value: T, start?: StartStopNotifier<T>) => Writable<T>;
+
+/**
+ * @template S, T
+ *
+ * Derived value store by synchronizing one or more readable stores and applying an aggregation function over its
+ * input values.
+ *
+ * @param {string}   key - Storage key.
+ *
+ * @param {S}        stores - Input stores.
+ *
+ * @param {Deriver<S, T>}  fn - Function callback that aggregates the values.
+ *
+ * @param {T}        [initial_value] When used asynchronously.
+ *
+ * @returns {Readable<U>} A derived storage store.
+ */
+export type StorageDerived = <S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T) => Readable<T>;
+
+export interface GeneratorStores {
+   derived: StorageDerived
+   readable: StorageReadable
+   writable: StorageWritable
 }
