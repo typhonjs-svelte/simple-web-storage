@@ -11,8 +11,8 @@
 
 Provides a set of [Svelte store](https://svelte.dev/docs#svelte_store) functions to connect Svelte w/ the 
 browser web storage API. This package is an evolution of [svelte-persistent-stores](https://www.npmjs.com/package/svelte-persistent-store) 
-for Svelte v4+. The primary reason to choose this package over alternatives is that it accomplishes the task in 125 
-lines of code w/ no dependencies besides Svelte.
+for Svelte v4+. The primary reason to choose this package over alternatives is that it accomplishes the task in ~100 
+source lines of code w/ no dependencies besides Svelte.
 
 ## Usage
 
