@@ -23,7 +23,7 @@ export default () =>
             sourcemap,
          }],
          plugins: [
-            typescript({ include: ['src/local.ts', 'src/generator.ts'] })
+            typescript({ include: ['src/generator.ts'] })
          ]
       },
       {
@@ -36,7 +36,7 @@ export default () =>
             sourcemap,
          }],
          plugins: [
-            typescript({ include: ['src/local.ts', 'src/generator.ts'] })
+            typescript({ include: ['src/local.ts'] })
          ]
       },
       {
@@ -49,21 +49,33 @@ export default () =>
             sourcemap,
          }],
          plugins: [
-            typescript({ include: ['src/session.ts', 'src/generator.ts'] })
+            typescript({ include: ['src/session.ts'] })
          ]
       },
 
       // Main Distribution Bundled TS Declarations -------------------------------------------------------------------
       {
-         input: 'src/local.ts',
+         input: 'src/generator.ts',
          output: [{
-            file: `./types/index.d.ts`,
+            file: `./types/generator.d.ts`,
             format: 'es',
             generatedCode: { constBindings: true },
             sourcemap: false
          }],
          plugins: [
             dts()
+         ]
+      },
+      {
+         input: 'src/local.ts',
+         output: [{
+            file: `./types/stores.d.ts`,
+            format: 'es',
+            generatedCode: { constBindings: true },
+            sourcemap: false
+         }],
+         plugins: [
+            dts({ compilerOptions: { removeComments: false }})
          ]
       }
    ];
