@@ -1,6 +1,6 @@
 {
   "name": "@typhonjs-svelte/simple-web-storage",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Provides Svelte stores for persisting data to web storage (localStorage / sessionStorage).",
   "license": "MPL-2.0",
   "type": "module",
@@ -10,18 +10,23 @@
   ],
   "sideEffects": false,
   "exports": {
+    "./generator": {
+      "types": "./types/generator.d.ts",
+      "import": "./dist/generator.js"
+    },
     "./local": {
-      "types": "./types/index.d.ts",
+      "types": "./types/stores.d.ts",
       "import": "./dist/local.js"
     },
     "./session": {
-      "types": "./types/index.d.ts",
+      "types": "./types/stores.d.ts",
       "import": "./dist/session.js"
     },
     "./package.json": "./package.json"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.2",
+    "@typhonjs-svelte/runtime-base": "github:typhonjs-svelte/runtime-base",
     "@vitest/coverage-c8": "^0.32.2",
     "@vitest/ui": "^0.32.2",
     "rollup": "^3.25.3",
