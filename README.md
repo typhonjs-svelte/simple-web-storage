@@ -14,8 +14,6 @@ browser web storage API. This package is an evolution of [svelte-persistent-stor
 for Svelte v4+. The primary reason to choose this package over alternatives is that it accomplishes the task in 125 
 lines of code w/ no dependencies besides Svelte.
 
-See the Advanced API section 
-
 ## Usage
 
 Persist to [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
