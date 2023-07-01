@@ -1,4 +1,7 @@
 # Changelog
+## Release 0.3.2 (minor)
+- Small JSDoc template fix / comments.
+
 ## Release 0.3.0 (major)
 - Refined API 
   - `generator` function renamed `storeGenerator`.
