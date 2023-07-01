@@ -1,6 +1,6 @@
 {
   "name": "@typhonjs-svelte/simple-web-storage",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Provides Svelte stores for persisting data to web storage (localStorage / sessionStorage).",
   "license": "MPL-2.0",
   "type": "module",
@@ -9,18 +9,27 @@
     "Michael Leahy <support@typhonjs.io> (https://github.com/typhonrt)"
   ],
   "sideEffects": false,
+  "imports": {
+    "#simple-web-storage/generator": "./src/generator/index.ts",
+    "#simple-web-storage/local": "./src/local/index.ts",
+    "#simple-web-storage/session": "./src/session/index.ts"
+  },
   "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./generator": {
-      "types": "./types/generator.d.ts",
-      "import": "./dist/generator.js"
+      "types": "./dist/generator/index.d.ts",
+      "import": "./dist/generator/index.js"
     },
     "./local": {
-      "types": "./types/stores.d.ts",
-      "import": "./dist/local.js"
+      "types": "./dist/local/index.d.ts",
+      "import": "./dist/local/index.js"
     },
     "./session": {
-      "types": "./types/stores.d.ts",
-      "import": "./dist/session.js"
+      "types": "./dist/session/index.d.ts",
+      "import": "./dist/session/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -43,15 +52,16 @@
     "node": ">=16.0"
   },
   "files": [
-    "/dist",
-    "/types"
+    "/dist"
   ],
-  "browserslist": [">5%", "not IE 11"],
   "scripts": {
     "build": "rollup -c",
     "eslint": "eslint .",
     "prepublishOnly": "npm run build && npm run test",
     "test": "vitest --coverage",
     "test-ui": "vitest --ui --coverage"
-  }
+  },
+  "bugs": "https://github.com/typhonjs-svelte/simple-web-storage/issues",
+  "homepage": "https://github.com/typhonjs-svelte/simple-web-storage#readme",
+  "repository": "github:typhonjs-svelte/simple-web-storage"
 }
