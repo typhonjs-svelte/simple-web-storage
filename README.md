@@ -77,18 +77,21 @@ import {
    StorageReadable,
    StorageWritable } from '@typhonjs-svelte/simple-web-storage/generator';
 
-// The `storage` option for `storageGenerator` must be a Storage API compatible instance.
+// The `storage` option for `storeGenerator` must be a Storage API compatible instance.
 
 // Provide a JSON parse / stringify signature compatible functions to modify serialization strategy. 
-// const deserializer = ... // (value: string) => any 
-// const serializer = ... // (value: any) => string 
+// const deserialize = ... // (value: string, ...rest: any[]) => any 
+// const serialize = ... // (value: any, ...rest: any[]) => string
 
-export const localStores = storeGenerator({ storage: globalThis?.localStorage, serializer, deserializer });
+export const localStores = storeGenerator({ storage: globalThis?.localStorage, serialize, deserialize });
 
+export const derived: StorageDerived = localStores.derived;
 export const readable: StorageReadable = localStores.readable;
 export const writable: StorageWritable = localStores.writable;
-export const derived: StorageDerived = localStores.derived;
 ```
+
+Beyond the `derived`, `readable`, and `writable` store helper functions created `storeGenerator` also adds the 
+`storage`, `serialize`, and `deserialize` instance / functions to the returned object.
 
 In the package tests the custom serialization strategy tested is compressed MessagePack to base64 data. 
 
