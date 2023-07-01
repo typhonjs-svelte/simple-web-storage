@@ -21,16 +21,18 @@ import type {
  *
  * @param {Storage}  storage - The web storage source.
  *
- * @param {(value: any) => string}  [opts.serialize] - Replace with custom serialization; default: `JSON.stringify`.
+ * @param {(value: any, ...rest: any[]) => string}  [opts.serialize] - Replace with custom serialization;
+ *        default: `JSON.stringify`.
  *
- * @param {(value: string) => any}  [opts.deserialize] - Replace with custom deserialization; default: `JSON.parse`.
+ * @param {(value: string, ...rest: any[]) => any}  [opts.deserialize] - Replace with custom deserialization;
+ *        default: `JSON.parse`.
+ *
+ * @returns {StorageStores} A complete set of store helper functions and associated storage API instance and
+ *          serialization strategy.
  */
 export function storeGenerator({ storage, serialize = JSON.stringify, deserialize = JSON.parse }:
- { storage: Storage, serialize?: (value: any) => string, deserialize?: (value: string) => any }): {
-   derived: StorageDerived
-   readable: StorageReadable
-   writable: StorageWritable
-}
+ { storage: Storage, serialize?: (value: any, ...rest: any[]) => string,
+   deserialize?: (value: string, ...rest: any[]) => any }): StorageStores
 {
    function isSimpleDeriver<S extends Stores, T>(deriver: Deriver<S, T>): deriver is SimpleDeriver<S, T>
    {
@@ -159,7 +161,11 @@ export function storeGenerator({ storage, serialize = JSON.stringify, deserializ
    return {
       readable: storageReadable,
       writable: storageWritable,
-      derived: storageDerived
+      derived: storageDerived,
+
+      storage,
+      serialize,
+      deserialize
    }
 }
 
@@ -171,6 +177,25 @@ type AdvancedDeriver<S extends Stores, T> = (values: StoresValues<S>, set: Subsc
 type Deriver<S extends Stores, T> = SimpleDeriver<S, T> | AdvancedDeriver<S, T>;
 
 type SimpleDeriver<S extends Stores, T> = (values: StoresValues<S>) => T;
+
+/**
+ * @template S, T
+ *
+ * Derived value store by synchronizing one or more readable stores and applying an aggregation function over its
+ * input values.
+ *
+ * @param {string}   key - Storage key.
+ *
+ * @param {S}        stores - Input stores.
+ *
+ * @param {Deriver<S, T>}  fn - Function callback that aggregates the values.
+ *
+ * @param {T}        [initial_value] When used asynchronously.
+ *
+ * @returns {Readable<T>} A derived storage store.
+ */
+export type StorageDerived = <S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T) =>
+ Readable<T>;
 
 /**
  * @template T
@@ -200,21 +225,17 @@ export type StorageReadable = <T>(key: string, value: T, start: StartStopNotifie
  */
 export type StorageWritable = <T>(key: string, value: T, start?: StartStopNotifier<T>) => Writable<T>;
 
+
 /**
- * @template S, T
- *
- * Derived value store by synchronizing one or more readable stores and applying an aggregation function over its
- * input values.
- *
- * @param {string}   key - Storage key.
- *
- * @param {S}        stores - Input stores.
- *
- * @param {Deriver<S, T>}  fn - Function callback that aggregates the values.
- *
- * @param {T}        [initial_value] When used asynchronously.
- *
- * @returns {Readable<T>} A derived storage store.
+ * The generated web storage store helper functions along with the associated storage API source and serialization
+ * strategy.
  */
-export type StorageDerived = <S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T) =>
- Readable<T>;
+export type StorageStores = {
+   derived: StorageDerived
+   readable: StorageReadable
+   writable: StorageWritable,
+
+   storage: Storage,
+   serialize: (value: any, ...rest: any[]) => string,
+   deserialize: (value: string, ...rest: any[]) => any
+};
