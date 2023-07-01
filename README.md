@@ -65,8 +65,8 @@ therefore this library by default serializes stored values as JSON.
 The `storeGenerator` function that wraps and creates [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage) 
 connected stores is available allowing further external customization. You may provide a custom serialization strategy 
 that is different from JSON along with providing any Storage API compatible interface besides browser `localStorage` / 
-`sessionStorage`. The `serializer` / `deserializer` functions must match the signatures of `JSON.parse` / 
-`JSON.stringify`.
+`sessionStorage`. The `serialize` / `deserialize` functions must match the partial signatures of `JSON.parse` / 
+`JSON.stringify`; IE the first `value` argument and return types.
 
 The following is a Typescript example for generating storage API compatible stores w/ a customized serialization 
 strategy: 
