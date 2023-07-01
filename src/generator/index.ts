@@ -214,7 +214,7 @@ export type StorageWritable = <T>(key: string, value: T, start?: StartStopNotifi
  *
  * @param {T}        [initial_value] When used asynchronously.
  *
- * @returns {Readable<U>} A derived storage store.
+ * @returns {Readable<T>} A derived storage store.
  */
 export type StorageDerived = <S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T) =>
  Readable<T>;
