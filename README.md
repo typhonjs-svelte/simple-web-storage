@@ -9,10 +9,11 @@
 [![Build Status](https://github.com/typhonjs-svelte/simple-web-storage/workflows/CI/CD/badge.svg)](#)
 [![Coverage](https://img.shields.io/codecov/c/github/typhonjs-svelte/simple-web-storage.svg)](https://codecov.io/github/typhonjs-svelte/simple-web-storage)
 
-Provides a set of [Svelte store](https://svelte.dev/docs#svelte_store) functions to connect Svelte w/ the 
-browser web storage API. This package is an evolution of [svelte-persistent-stores](https://www.npmjs.com/package/svelte-persistent-store) 
-for Svelte v4+. The primary reason to choose this package over alternatives is that it accomplishes the task in ~100 
-source lines of code w/ no dependencies besides Svelte.
+Provides a set of [Svelte store](https://svelte.dev/docs#svelte_store) helper functions to connect Svelte w/ the 
+browser web [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage) API. This package is an evolution of 
+[svelte-persistent-stores](https://www.npmjs.com/package/svelte-persistent-store) for Svelte v4+. The primary reason to 
+choose this package over alternatives is that it accomplishes the task in ~100 source lines of code w/ no dependencies 
+besides Svelte.
 
 ## Usage
 
@@ -21,6 +22,7 @@ Persist to [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Windo
 ```js
 import { writable, readable, derived } from '@typhonjs-svelte/simple-web-storage/local';
 
+// The first argument is the storage key followed by any default value.
 const count = writable('count', 0);
 
 count.set(1);
@@ -31,9 +33,24 @@ Persist to [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Win
 ```js
 import { writable, readable, derived } from '@typhonjs-svelte/simple-web-storage/session';
 
+// The first argument is the storage key followed by any default value.
 const count = writable('count', 0);
 
 count.set(1);
+```
+
+The named exports from the main package export provides `localStores` / `sessionStores` respectively containing 
+`derived` / `readable` / `writable` properties. 
+
+```js
+import { localStores, sessionStores } from '@typhonjs-svelte/simple-web-storage';
+
+// The first argument is the storage key followed by any default value.
+const localCount = localStores.writable('count', 0);
+const sessionCount = sessionStores.writable('count', 0);
+
+localCount.set(1);
+sessionCount.set(1);
 ```
 
 ## API
@@ -41,11 +58,11 @@ count.set(1);
 The stores provided have the same signature as the Svelte store helper functions except the first argument is the 
 string `key` used by `localStorage` and `sessionStorage` to store and retrieve the value. The 
 [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage) interface specification only allows string values 
-therefore this library serializes stored values as JSON.
+therefore this library by default serializes stored values as JSON.
 
 ## Advanced API / Customization
 
-The `generator` function that wraps and creates [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage) 
+The `storeGenerator` function that wraps and creates [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage) 
 connected stores is available allowing further external customization. You may provide a custom serialization strategy 
 that is different from JSON along with providing any Storage API compatible interface besides browser `localStorage` / 
 `sessionStorage`. The `serializer` / `deserializer` functions must match the signatures of `JSON.parse` / 
@@ -55,24 +72,22 @@ The following is a Typescript example for generating storage API compatible stor
 strategy: 
 ```ts
 import {
-   generator,
-   GeneratorStores,
+   storeGenerator,
    StorageDerived,
    StorageReadable,
    StorageWritable } from '@typhonjs-svelte/simple-web-storage/generator';
 
-// Retrieve storage API source.
-const storage: Storage = typeof globalThis?.localStorage !== 'undefined' ? globalThis.localStorage : undefined;
+// The `storage` option for `storageGenerator` must be a Storage API compatible instance.
 
 // Provide a JSON parse / stringify signature compatible functions to modify serialization strategy. 
-// const deserializer = // (value: string) => any 
-// const serializer = // (value: any) => string 
+// const deserializer = ... // (value: string) => any 
+// const serializer = ... // (value: any) => string 
 
-const g: GeneratorStores = generator({ storage, serializer, deserializer });
+export const localStores = storeGenerator({ storage: globalThis?.localStorage, serializer, deserializer });
 
-export const readable: StorageReadable = g.readable;
-export const writable: StorageWritable = g.writable;
-export const derived: StorageDerived = g.derived;
+export const readable: StorageReadable = localStores.readable;
+export const writable: StorageWritable = localStores.writable;
+export const derived: StorageDerived = localStores.derived;
 ```
 
 In the package tests the custom serialization strategy tested is compressed MessagePack to base64 data. 
