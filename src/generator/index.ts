@@ -13,16 +13,9 @@ import type {
    Updater,
    Writable }        from 'svelte/store';
 
-function isSimpleDeriver<S extends Stores, T>(deriver: Deriver<S, T>): deriver is SimpleDeriver<S, T>
-{
-   return deriver.length < 2;
-}
-
-const noop = () => void 0;
-
 /**
- * Generates derived, readable, writable helper functions wrapping the Storage method with any additional customization
- * of serialization.
+ * Generates derived, readable, writable helper functions wrapping the given Storage API provided with any additional
+ * customization for data serialization. By default, JSON serialization is used.
  *
  * @param {object}   opts - Generator options.
  *
@@ -32,17 +25,26 @@ const noop = () => void 0;
  *
  * @param {(value: string) => any}  [opts.deserialize] - Replace with custom deserialization; default: `JSON.parse`.
  */
-export function generator({ storage, serialize = JSON.stringify, deserialize = JSON.parse }:
- { storage: Storage, serialize?: (value: any) => string, deserialize?: (value: string) => any }): GeneratorStores
+export function storeGenerator({ storage, serialize = JSON.stringify, deserialize = JSON.parse }:
+ { storage: Storage, serialize?: (value: any) => string, deserialize?: (value: string) => any }): {
+   derived: StorageDerived
+   readable: StorageReadable
+   writable: StorageWritable
+}
 {
-   function readable<T>(key: string, value: T, start: StartStopNotifier<T>): Readable<T>
+   function isSimpleDeriver<S extends Stores, T>(deriver: Deriver<S, T>): deriver is SimpleDeriver<S, T>
+   {
+      return deriver.length < 2;
+   }
+
+   function storageReadable<T>(key: string, value: T, start: StartStopNotifier<T>): Readable<T>
    {
       return {
-         subscribe: writable(key, value, start).subscribe
+         subscribe: storageWritable(key, value, start).subscribe
       }
    }
 
-   function writable<T>(key: string, value: T, start?: StartStopNotifier<T>): Writable<T>
+   function storageWritable<T>(key: string, value: T, start?: StartStopNotifier<T>): Writable<T>
    {
       function wrap_start(ogSet: Subscriber<T>)
       {
@@ -84,7 +86,7 @@ export function generator({ storage, serialize = JSON.stringify, deserialize = J
          set(fn(get(ogStore)));
       }
 
-      function subscribe(run: Subscriber<T>, invalidate: Invalidator<T> = noop): Unsubscriber
+      function subscribe(run: Subscriber<T>, invalidate?: Invalidator<T>): Unsubscriber
       {
          return ogStore.subscribe(run, invalidate);
       }
@@ -92,7 +94,8 @@ export function generator({ storage, serialize = JSON.stringify, deserialize = J
       return { set, update, subscribe };
    }
 
-   function derived<S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T): Readable<T>
+   function storageDerived<S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T):
+    Readable<T>
    {
       const single = !Array.isArray(stores);
       const stores_array: Array<Readable<any>> = single ? [stores as Readable<any>] : stores as Array<Readable<any>>;
@@ -106,19 +109,19 @@ export function generator({ storage, serialize = JSON.stringify, deserialize = J
          catch (err) { /**/ }
       }
 
-      return readable(key, initial_value, (set, update) =>
+      return storageReadable(key, initial_value, (set, update) =>
       {
          let inited = false;
          const values: StoresValues<S> = [] as StoresValues<S>;
 
          let pending = 0;
-         let cleanup = noop;
+         let cleanup;
 
          const sync = () =>
          {
             if (pending) { return; }
 
-            cleanup();
+            cleanup?.();
             const input: StoresValues<S> = single ? values[0] : values;
 
             if (isSimpleDeriver(fn))
@@ -128,7 +131,7 @@ export function generator({ storage, serialize = JSON.stringify, deserialize = J
             else
             {
                const result = fn(input, set, update);
-               cleanup = typeof result === 'function' ? result as Unsubscriber : noop;
+               if (typeof result === 'function') { cleanup = result as Unsubscriber; }
             }
          };
 
@@ -148,15 +151,15 @@ export function generator({ storage, serialize = JSON.stringify, deserialize = J
          {
             // Equivalent to run_all from Svelte internals.
             unsubscribers.forEach((unsubscriber) => unsubscriber());
-            cleanup();
+            cleanup?.();
          }
       });
    }
 
    return {
-      readable,
-      writable,
-      derived
+      readable: storageReadable,
+      writable: storageWritable,
+      derived: storageDerived
    }
 }
 
@@ -213,10 +216,5 @@ export type StorageWritable = <T>(key: string, value: T, start?: StartStopNotifi
  *
  * @returns {Readable<U>} A derived storage store.
  */
-export type StorageDerived = <S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T) => Readable<T>;
-
-export interface GeneratorStores {
-   derived: StorageDerived
-   readable: StorageReadable
-   writable: StorageWritable
-}
+export type StorageDerived = <S extends Stores, T>(key: string, stores: S, fn: Deriver<S, T>, initial_value?: T) =>
+ Readable<T>;
