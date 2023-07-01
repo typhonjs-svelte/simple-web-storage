@@ -1,4 +1,11 @@
 # Changelog
+## Release 0.4.0 (medium)
+- Refined type declarations 
+  - Added `StorageStores` type alias for output of `storeGenerator`.
+- `storeGenerator` now adds the `storage`, `deserialize`, and `serialize` data to output of `storeGenerator`
+  - This allows easier downstream overriding of any management code where a serialization strategy can be changed for 
+    a single instance of store creation.
+
 ## Release 0.3.2 (minor)
 - Small JSDoc template fix / comments.
 
