@@ -1,4 +1,13 @@
 # Changelog
+## Release 0.3.0 (major)
+- Refined API 
+  - `generator` function renamed `storeGenerator`.
+  - Both `local` and `session` sub-path exports provide a new combined export `localStores` and `sessionStores` 
+    respectively allowing more flexible consumption of this package.
+  - Default package export now exports `localStores` and `sessionStores`.
+- Cleaned up the types generated avoiding duplication of types across sub-path exports.
+- More comments.
+
 ## Release 0.2.0 (major)
 - Added `generator` to `exports` in `package.json` allowing external customization.
 - Upgraded `generator` to accept custom `serializer` and `deserializer` functions to change the serialization strategy 
