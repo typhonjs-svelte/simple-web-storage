@@ -3,17 +3,20 @@
 [![NPM](https://img.shields.io/npm/v/@typhonjs-svelte/simple-web-storage.svg?label=npm)](https://www.npmjs.com/package/@typhonjs-svelte/simple-web-storage)
 [![Code Style](https://img.shields.io/badge/code%20style-allman-yellowgreen.svg?style=flat)](https://en.wikipedia.org/wiki/Indent_style#Allman_style)
 [![License](https://img.shields.io/badge/license-MPLv2-yellowgreen.svg?style=flat)](https://github.com/typhonjs-svelte/simple-web-storage/blob/main/LICENSE)
-[![Discord](https://img.shields.io/discord/737953117999726592?label=TyphonJS%20Discord)](https://discord.gg/mnbgN8f)
-[![Twitch](https://img.shields.io/twitch/status/typhonrt?style=social)](https://www.twitch.tv/typhonrt)
-
 [![Build Status](https://github.com/typhonjs-svelte/simple-web-storage/workflows/CI/CD/badge.svg)](#)
 [![Coverage](https://img.shields.io/codecov/c/github/typhonjs-svelte/simple-web-storage.svg)](https://codecov.io/github/typhonjs-svelte/simple-web-storage)
+[![API Docs](https://img.shields.io/badge/API%20Documentation-476ff0)](https://typhonjs-svelte.github.io/simple-web-storage/)
+[![Discord](https://img.shields.io/discord/737953117999726592?label=TyphonJS%20Discord)](https://typhonjs.io/discord/)
+[![Twitch](https://img.shields.io/twitch/status/typhonrt?style=social)](https://www.twitch.tv/typhonrt)
+
 
 Provides a set of [Svelte store](https://svelte.dev/docs#svelte_store) helper functions to connect Svelte w/ the 
 browser web [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage) API. This package is an evolution of 
 [svelte-persistent-stores](https://www.npmjs.com/package/svelte-persistent-store) for Svelte v4+. The primary reason to 
 choose this package over alternatives is that it accomplishes the task in ~100 source lines of code w/ no dependencies 
 besides Svelte.
+
+[API documentation](https://typhonjs-svelte.github.io/simple-web-storage/)
 
 ## Usage
 
