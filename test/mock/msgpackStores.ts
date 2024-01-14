@@ -4,12 +4,23 @@ import {
 
 import { storeGenerator }  from '../../src/generator';
 
-// Default export specifically for testing setup.
-export default {
+const localMsgPackStores = {
    ...storeGenerator({
       storage: globalThis?.localStorage,
       serialize: packAndDeflateB64,
       deserialize: inflateAndUnpackB64
    }),
    deserialize: inflateAndUnpackB64
-}
+};
+
+const sessionMsgPackStores = {
+   ...storeGenerator({
+      storage: globalThis?.sessionStorage,
+      serialize: packAndDeflateB64,
+      deserialize: inflateAndUnpackB64
+   }),
+   deserialize: inflateAndUnpackB64
+};
+
+export { localMsgPackStores, sessionMsgPackStores }
+

@@ -1,20 +1,34 @@
-import './mock/localStorage';
-
-import msgpackStores from './mock/msgpackStores';
+import './mock/webStorage';
 
 import {
-   derived,
-   readable,
-   writable }        from '../src/local';
+   localMsgPackStores,
+   sessionMsgPackStores }  from './mock/msgpackStores';
 
-import { get }       from 'svelte/store';
+import {
+   localStores,
+   sessionStores }         from '../src';
+
+import { get }             from 'svelte/store';
 
 const versions = [
-   { name: 'JSON', derived, readable, writable, deserialize: JSON.parse },
-   { name: 'MessagePack', ...msgpackStores }
+   {
+      name: 'JSON-local',
+      ...localStores,
+      deserialize: JSON.parse,
+   },
+   {
+      name: 'JSON-session',
+      ...sessionStores,
+      deserialize: JSON.parse
+   },
+   { name: 'MessagePack-local', ...localMsgPackStores },
+   { name: 'MessagePack-session', ...sessionMsgPackStores }
 ];
 
-beforeEach(() => globalThis.localStorage.clear());
+beforeEach(() => {
+   globalThis.localStorage.clear();
+   globalThis.sessionStorage.clear();
+});
 
 for (const version of versions)
 {
@@ -104,17 +118,17 @@ for (const version of versions)
             let count1 = 0;
             let count2 = 0;
 
-            assert.equal('0', version.deserialize(globalThis.localStorage.getItem('store')));
+            assert.equal('0', version.deserialize(version.storage.getItem('store')));
 
             store.subscribe(() => count1 += 1)();
             assert.strictEqual(count1, 1);
 
-            assert.equal('1', version.deserialize(globalThis.localStorage.getItem('store')));
+            assert.equal('1', version.deserialize(version.storage.getItem('store')));
 
             const unsubscribe = store.subscribe(() => count2 += 1);
             assert.strictEqual(count2, 1);
 
-            assert.equal('2', version.deserialize(globalThis.localStorage.getItem('store')));
+            assert.equal('2', version.deserialize(version.storage.getItem('store')));
 
             unsubscribe();
          });
@@ -124,7 +138,7 @@ for (const version of versions)
             const initial_value = 10;
             version.writable('store', initial_value);
 
-            const stored_value = version.deserialize(globalThis.localStorage.getItem('store'));
+            const stored_value = version.deserialize(version.storage.getItem('store'));
 
             assert.strictEqual(initial_value, stored_value);
          })
@@ -146,11 +160,11 @@ for (const version of versions)
             const initial_value = 10;
 
             // @ts-expect-error   Artificially set bad data in storage.
-            globalThis.localStorage.setItem('store', new Map([]));
+            version.storage.setItem('store', new Map([]));
 
             version.writable('store', initial_value);
 
-            const stored_value = version.deserialize(globalThis.localStorage.getItem('store'));
+            const stored_value = version.deserialize(version.storage.getItem('store'));
 
             assert.strictEqual(initial_value, stored_value);
          })
