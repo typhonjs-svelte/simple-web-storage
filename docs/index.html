@@ -2,15 +2,17 @@
 <p><a href="https://www.npmjs.com/package/@typhonjs-svelte/simple-web-storage"><img src="https://img.shields.io/npm/v/@typhonjs-svelte/simple-web-storage.svg?label=npm" alt="NPM"></a>
 <a href="https://en.wikipedia.org/wiki/Indent_style#Allman_style"><img src="https://img.shields.io/badge/code%20style-allman-yellowgreen.svg?style=flat" alt="Code Style"></a>
 <a href="https://github.com/typhonjs-svelte/simple-web-storage/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MPLv2-yellowgreen.svg?style=flat" alt="License"></a>
-<a href="https://discord.gg/mnbgN8f"><img src="https://img.shields.io/discord/737953117999726592?label=TyphonJS%20Discord" alt="Discord"></a>
+<a href="#"><img src="https://github.com/typhonjs-svelte/simple-web-storage/workflows/CI/CD/badge.svg" alt="Build Status"></a>
+<a href="https://codecov.io/github/typhonjs-svelte/simple-web-storage"><img src="https://img.shields.io/codecov/c/github/typhonjs-svelte/simple-web-storage.svg" alt="Coverage"></a>
+<a href="https://typhonjs-svelte.github.io/simple-web-storage/"><img src="https://img.shields.io/badge/API%20Documentation-476ff0" alt="API Docs"></a>
+<a href="https://typhonjs.io/discord/"><img src="https://img.shields.io/discord/737953117999726592?label=TyphonJS%20Discord" alt="Discord"></a>
 <a href="https://www.twitch.tv/typhonrt"><img src="https://img.shields.io/twitch/status/typhonrt?style=social" alt="Twitch"></a></p>
-<p><a href="#"><img src="https://github.com/typhonjs-svelte/simple-web-storage/workflows/CI/CD/badge.svg" alt="Build Status"></a>
-<a href="https://codecov.io/github/typhonjs-svelte/simple-web-storage"><img src="https://img.shields.io/codecov/c/github/typhonjs-svelte/simple-web-storage.svg" alt="Coverage"></a></p>
 <p>Provides a set of <a href="https://svelte.dev/docs#svelte_store">Svelte store</a> helper functions to connect Svelte w/ the 
 browser web <a href="https://developer.mozilla.org/en-US/docs/Web/API/Storage">Storage</a> API. This package is an evolution of 
 <a href="https://www.npmjs.com/package/svelte-persistent-store">svelte-persistent-stores</a> for Svelte v4+. The primary reason to 
 choose this package over alternatives is that it accomplishes the task in ~100 source lines of code w/ no dependencies 
 besides Svelte.</p>
+<p><a href="https://typhonjs-svelte.github.io/simple-web-storage/">API documentation</a></p>
 <a id="md:usage" class="tsd-anchor"></a><h2><a href="#md:usage">Usage</a></h2><p>Persist to <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">localStorage</a></p>
 <pre><code class="language-js"><span class="hl-0">import</span><span class="hl-1"> { </span><span class="hl-2">writable</span><span class="hl-1">, </span><span class="hl-2">readable</span><span class="hl-1">, </span><span class="hl-2">derived</span><span class="hl-1"> } </span><span class="hl-0">from</span><span class="hl-1"> </span><span class="hl-3">'@typhonjs-svelte/simple-web-storage/local'</span><span class="hl-1">;</span><br><br><span class="hl-4">// The first argument is the storage key followed by any default value.</span><br><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">count</span><span class="hl-1"> = </span><span class="hl-7">writable</span><span class="hl-1">(</span><span class="hl-3">'count'</span><span class="hl-1">, </span><span class="hl-8">0</span><span class="hl-1">);</span><br><br><span class="hl-2">count</span><span class="hl-1">.</span><span class="hl-7">set</span><span class="hl-1">(</span><span class="hl-8">1</span><span class="hl-1">);</span>
 </code><button>Copy</button></pre>
