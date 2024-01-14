@@ -1,4 +1,8 @@
 # Changelog
+## Release 0.5.0 (minor)
+- 100% test coverage
+- Added API documentation
+
 ## Release 0.4.0 (medium)
 - Refined type declarations 
   - Added `StorageStores` type alias for output of `storeGenerator`.
