@@ -1,6 +1,6 @@
 {
   "name": "@typhonjs-svelte/simple-web-storage",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Provides Svelte stores for persisting data to the Web Storage API (localStorage / sessionStorage).",
   "license": "MPL-2.0",
   "type": "module",
@@ -34,16 +34,17 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@rollup/plugin-typescript": "^11.1.2",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@typhonjs-svelte/runtime-base": "github:typhonjs-svelte/runtime-base",
-    "@vitest/coverage-c8": "^0.32.2",
-    "@vitest/ui": "^0.32.2",
-    "rollup": "^3.25.3",
-    "rollup-plugin-dts": "^5.3.0",
-    "svelte": "^4.0.0",
-    "tslib": "^2.6.0",
-    "typescript": "^5.1.5",
-    "vitest": "^0.32.2"
+    "@typhonjs-typedoc/typedoc-pkg" : "^0.0.2",
+    "@vitest/coverage-v8": "^1.1.3",
+    "@vitest/ui": "^1.1.3",
+    "rollup": "^4.9.5",
+    "rollup-plugin-dts": "^6.1.0",
+    "svelte": "^4.2.8",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
   },
   "peerDependencies": {
     "svelte": ">=4.x.x"
@@ -54,14 +55,31 @@
   "files": [
     "/dist"
   ],
+  "keywords": [
+    "typhonjs",
+    "svelte",
+    "store",
+    "localStorage",
+    "sessionStorage",
+    "web storage"
+  ],
+  "typedocOptions": {
+    "dmtLinksService": {
+      "Discord": "https://typhonjs.io/discord/",
+      "GitHub": "https://github.com/typhonjs-svelte/simple-web-storage",
+      "NPM": "https://www.npmjs.com/package/@typhonjs-svelte/simple-web-storage"
+    }
+  },
+  "bugs": "https://github.com/typhonjs-svelte/simple-web-storage/issues",
+  "homepage": "https://github.com/typhonjs-svelte/simple-web-storage#readme",
+  "repository": "github:typhonjs-svelte/simple-web-storage",
+  "apidocs": "https://typhonjs-svelte.github.io/simple-web-storage/",
   "scripts": {
     "build": "rollup -c",
+    "docs": "typedoc-pkg --api-link esm,dom",
     "eslint": "eslint .",
     "prepublishOnly": "npm run build && npm run test",
     "test": "vitest --coverage",
     "test-ui": "vitest --ui --coverage"
-  },
-  "bugs": "https://github.com/typhonjs-svelte/simple-web-storage/issues",
-  "homepage": "https://github.com/typhonjs-svelte/simple-web-storage#readme",
-  "repository": "github:typhonjs-svelte/simple-web-storage"
+  }
 }
